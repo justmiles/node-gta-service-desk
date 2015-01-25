@@ -6,11 +6,12 @@ Javascript library for GotoAssist Service Desk
 
 Example:
 
-```var serviceDesk = new ServiceDesk();
+
+```javascript
+var serviceDesk = new ServiceDesk();
 serviceDesk.setApiKey('API_KEY');
 
 serviceDesk.showIncident(100, function(response) {
     console.log(response.result.incident.id);
 });
-
 ```
