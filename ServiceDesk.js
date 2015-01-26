@@ -13,18 +13,40 @@ ServiceDesk.prototype.setApiKey = function(apiKey) {
     this.apiKey = apiKey;
 };
 
-ServiceDesk.prototype.getApiKey = function() {
-    return this.apiKey;
-};
-
 ServiceDesk.prototype.setApiURL = function(apiURL) {
     this.apiURL = apiURL;
 };
 
-ServiceDesk.prototype.getApiURL = function() {
-    return this.apiURL;
+// Incidents
+ServiceDesk.prototype.showIncidents = function(params, callback) {
+
+    this.XHR('GET', '/incidents.'+this.format, params, null, function(body) {
+        callback(body);
+    })
+
 };
 
+ServiceDesk.prototype.showIncident = function(id, callback) {
+    this.XHR('GET','/incidents/'+id+'.'+this.format, null, null, function(body) {
+        callback(body);
+    })
+};
+
+ServiceDesk.prototype.createIncident = function(payload, callback) {
+    payload = { incident : payload  };
+    this.XHR('POST','/incidents.'+this.format, null, payload, function(body) {
+        callback(body);
+    })
+};
+
+ServiceDesk.prototype.updateIncident = function(params, payload, callback) {
+    payload = { incident : payload  };
+    this.XHR('PUT','/incidents.'+this.format, null, payload, function(body) {
+        callback(body);
+    })
+};
+
+// XHR
 ServiceDesk.prototype.XHR = function(method, api, params, payload, callback) {
     if (params == null) {
         params = '';
@@ -54,11 +76,22 @@ ServiceDesk.prototype.XHR = function(method, api, params, payload, callback) {
         });
 
         res.on('end', function() {
+            try {
+                var jsonResponse = JSON.parse(response);
+            } catch(e) {
+                console.log('Could not parse response. ' + e);
+                return false;
+            }
             if (res.headers.status != '200 OK') {
                 console.log(res.headers.status);
             }
-
-            callback(JSON.parse(response));
+            if (jsonResponse.status == 'Success'){
+                callback(jsonResponse.result);
+            } else {
+                console.log('Request failed');
+                console.log(jsonResponse.errors[0].error);
+                return false;
+            }
 
         });
 
@@ -74,35 +107,6 @@ ServiceDesk.prototype.XHR = function(method, api, params, payload, callback) {
 
 };
 
-// Incidents
-ServiceDesk.prototype.showIncidents = function(params, callback) {
-
-    this.XHR('GET', '/incidents.'+this.format, params, null, function(body) {
-        callback(body);
-    })
-
-};
-
-ServiceDesk.prototype.showIncident = function(id, callback) {
-    this.XHR('GET','/incidents/'+id+'.'+this.format, null, null, function(body) {
-        callback(body);
-    })
-};
-
-ServiceDesk.prototype.createIncident = function(id,params, payload, callback) {
-    payload = { incident : payload  };
-    this.XHR('POST','/incidents/'+id+'.'+this.format, null, payload, function(body) {
-        callback(body);
-    })
-};
-
-ServiceDesk.prototype.updateIncident = function(params, payload, callback) {
-  payload = { incident : payload  };
-  this.XHR('PUT','/incidents.'+this.format, null, payload, function(body) {
-    callback(body);
-  })
-};
-
 // Utilities
 Object.prototype.toURL = function() {
     obj = this;
@@ -110,3 +114,5 @@ Object.prototype.toURL = function() {
             return encodeURIComponent(k) + '=' + encodeURIComponent(obj[k])
         }).join('&')
 };
+
+module.exports = new ServiceDesk();
