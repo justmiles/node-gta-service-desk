@@ -1,5 +1,5 @@
 # GTA Service Desk
-Javascript library for GotoAssist Service Desk
+Node.js client for GotoAssist Service Desk
 
 Example:
 
