@@ -1,17 +1,18 @@
-# node-gta-service-desk
+# GTA Service Desk
 Javascript library for GotoAssist Service Desk
 
 Example:
 
-
 ```javascript
-var serviceDesk = require('./ServiceDesk.js');
+var ServiceDesk = require('../node-gta-service-desk');
 
-serviceDesk.setApiKey('API_KEY');
+serviceDesk = new ServiceDesk('API_KEY');
 
-serviceDesk.showIncident(1, function(response) {
-    console.log(response.status.incident.title);
+// Shows incident 100 and logs title
+serviceDesk.showIncident(100, function (incident) {
+    console.log(incident.title);
 });
+
 ```
 
 API Token can be obtained here:
