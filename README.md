@@ -4,7 +4,7 @@ Javascript library for GotoAssist Service Desk
 Example:
 
 ```javascript
-var ServiceDesk = require('../node-gta-service-desk');
+var ServiceDesk = require('node-gta-service-desk');
 
 serviceDesk = new ServiceDesk('API_KEY');
 
