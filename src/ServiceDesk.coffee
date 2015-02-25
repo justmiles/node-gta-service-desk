@@ -1,6 +1,6 @@
 http = require('https')
 
-module.exports = class ServiceDesk
+class ServiceDesk
   constructor: (apiKey) ->
     @apiKey = apiKey
     @apiHost = 'deskapi.gotoassist.com'
@@ -15,32 +15,75 @@ module.exports = class ServiceDesk
     @apiURL = apiURL
     return @apiURL
 
-# Incidents
+  # Incidents API Calls
   showIncidents:(params, callback) ->
-    this.XHR 'GET', '/incidents.' + @format, params, null, (body) ->
-      if (body)
-        callback body
+    this.XHR 'GET', '/incidents.' + @format, params, null, callback
 
   showIncident:(id, callback) ->
-    this.XHR 'GET', '/incidents/' + id + '.' + @format, null, null, (body) ->
-      if (body)
-        callback body.incident
+    this.XHR 'GET', '/incidents/' + id + '.' + @format, null, null, callback
 
   createIncident:(payload, callback) ->
     payload = incident: payload
-    this.XHR 'POST', '/incidents.' + @format, null, payload, (body) ->
-      if (body)
-        callback body.incident
-      else
-        callback false
-# Incidents
+    this.XHR 'POST', '/incidents.' + @format, null, payload, callback
 
+  updateIncident:(id, payload, callback) ->
+    payload = incident: payload
+    this.XHR 'PUT', '/incidents/' + id + '.' + @format, null, null, callback
+
+  #  Problems API Calls
+  showProblems:(params, callback) ->
+    this.XHR 'GET', '/problems.' + @format, params, null, callback
+
+  showProblem:(id, callback) ->
+    this.XHR 'GET', '/problems/' + id + '.' + @format, null, null, callback
+
+  createProblem:(payload, callback) ->
+    payload = problem: payload
+    this.XHR 'POST', '/problems.' + @format, null, payload, callback
+
+  updateProblem:(id, payload, callback) ->
+    payload = problem: payload
+    this.XHR 'PUT', '/problems/' + id + '.' + @format, null, null, callback
+
+  #  Changes API Calls
+  showChanges:(params, callback) ->
+    this.XHR 'GET', '/changes.' + @format, params, null, callback
+
+  showChange:(id, callback) ->
+    this.XHR 'GET', '/changes/' + id + '.' + @format, null, null, callback
+
+  createChange:(payload, callback) ->
+    payload = change: payload
+    this.XHR 'POST', '/changes.' + @format, null, payload, callback
+
+  updateChange:(id, payload, callback) ->
+    payload = change: payload
+    this.XHR 'PUT', '/changes/' + id + '.' + @format, null, null, callback
+
+  #  Release API Calls
+  showReleases:(params, callback) ->
+    this.XHR 'GET', '/releases.' + @format, params, null, callback
+
+  showRelease:(id, callback) ->
+    this.XHR 'GET', '/releases/' + id + '.' + @format, null, null, callback
+
+  createRelease:(payload, callback) ->
+    payload = release: payload
+    this.XHR 'POST', '/releases.' + @format, null, payload, callback
+
+  updateRelease:(id, payload, callback) ->
+    payload = release: payload
+    this.XHR 'PUT', '/releases/' + id + '.' + @format, null, null, callback
+
+  #  utils
   XHR:(method, api, params, payload, callback) ->
     if params == null
       params = ''
     else
       params = params.toURL()
+
     payloadString = JSON.stringify(payload)
+
     options =
       host: @apiHost
       path: '/' + @apiVersion + api + params
@@ -49,27 +92,29 @@ module.exports = class ServiceDesk
       headers:
         'Content-Type': 'application/json'
         'Content-Length': payloadString.length
+
     req = http.request options, (res) ->
       res.setEncoding 'utf8'
       response = ''
+
       res.on 'data', (data) ->
         response += data
-        return
+
       res.on 'end', ->
         try
           jsonResponse = JSON.parse(response)
         catch e
           console.log 'Could not parse response. ' + e
-          return false
+
         if res.headers.status != '200 OK'
-          console.log res.headers.status
+          console.log 'headers: ' + res.headers.status
         if jsonResponse.status == 'Success'
           callback jsonResponse.result
+
         else
           console.log 'Request failed'
-          console.log jsonResponse.errors[0].error
-          return false
-
+          console.log 'Error: ' + jsonResponse.errors[0].error
+          callback false
     req.on 'error', (e) ->
       console.log 'HTTPS ERROR: ' + e
 
@@ -82,96 +127,98 @@ Object::toURL = ->
     encodeURIComponent(k) + '=' + encodeURIComponent(obj[k])
   ).join('&')
 
+module.exports = ServiceDesk
+
 # # # # # # # # # # # # # # # # # #
-#     TODO: add below calls
 #    Incidents API Calls
-#      -Show Incidents (GET)
-#      -Show Incident (GET)
-#      -Create Incident (POST)
-#      Update Incident (PUT)
+#      Show Incidents (GET)
+#      Show Incident (GET)
+#      Create Incident (POST)
+#      TODO: Update Incident (PUT)
 #    Problems API Calls
 #      Show Problems (GET)
 #      Show Problem (GET)
-#      Create Problem (POST)
-#      Update Problem (PUT)
+#      TODO: Create Problem (POST)
+#      TODO: Update Problem (PUT)
 #    Changes API Calls
 #      Show Changes (GET)
-#      Show Change (GET)
-#      Create Change (POST)
-#      Update Change (PUT)
+#      TODO: Show Change (GET)
+#      TODO: Create Change (POST)
+#      TODO: Update Change (PUT)
 #    Releases API Calls
-#      Show Releases (GET)
-#      Show Release (GET)
-#      Create Release (POST)
-#      Update Release (PUT)
+#      TODO: Show Releases (GET)
+#      TODO: Show Release (GET)
+#      TODO: Create Release (POST)
+#      TODO: Update Release (PUT)
 #    Configuration API Calls
-#      Show Top-Level Config Types (GET)
-#      Show Config Type (GET)
-#      Show Config Relationship Types (GET)
-#      Show Config Item (GET)
-#      Create Config Item (POST)
-#      Update Config Item (PUT)
+#      TODO: Show Top-Level Config Types (GET)
+#      TODO: Show Config Type (GET)
+#      TODO: Show Config Relationship Types (GET)
+#      TODO: Show Config Item (GET)
+#      TODO: Create Config Item (POST)
+#      TODO: Update Config Item (PUT)
 #    Notes API Calls
-#      Show Note (GET)
-#      Update Note (PUT)
-#      Create Note (POST)
-#      Delete Note (DELETE)
+#      TODO: Show Note (GET)
+#      TODO: Update Note (PUT)
+#      TODO: Create Note (POST)
+#      TODO: Delete Note (DELETE)
 #    Watches API Calls
-#      Show Watches (GET)
-#      Show Watch (GET)
-#      Create Watch (POST)
-#      Update Watch (PUT)
-#      Delete Watch (DELETE)
+#      TODO: Show Watches (GET)
+#      TODO: Show Watch (GET)
+#      TODO: Create Watch (POST)
+#      TODO: Update Watch (PUT)
+#      TODO: Delete Watch (DELETE)
 #    Change Testers API Calls
-#      Show Change Testers (GET)
-#      Show Change Tester (GET)
-#      Create Change Tester (POST)
-#      Update Change Tester (PUT)
-#      Delete Change Tester (DELETE)
+#      TODO: Show Change Testers (GET)
+#      TODO: Show Change Tester (GET)
+#      TODO: Create Change Tester (POST)
+#      TODO: Update Change Tester (PUT)
+#      TODO: Delete Change Tester (DELETE)
 #    Issues API Calls
-#      Show Issues (GET)
-#      Show Issue (GET)
-#      Create Issue (POST)
-#      Update Issue (PUT)
+#      TODO: Show Issues (GET)
+#      TODO: Show Issue (GET)
+#      TODO: Create Issue (POST)
+#      TODO: Update Issue (PUT)
 #    Review Users API Calls
-#      Show Release Review Users (GET)
-#      Show Release Review User (GET)
-#      Create Release Review User (POST)
-#      Update Release Review User (PUT)
-#      Delete Release Review User (DELETE)
+#      TODO: Show Release Review Users (GET)
+#      TODO: Show Release Review User (GET)
+#      TODO: Create Release Review User (POST)
+#      TODO: Update Release Review User (PUT)
+#      TODO: Delete Release Review User (DELETE)
 #    Release Records API Calls
-#      Show Release Records (GET)  Show Release Record (GET)
-#      Create Release Record (POST)
-#      Update Release Record (PUT)
+#      TODO: Show Release Records (GET)
+#      TODO: Show Release Record (GET)
+#      TODO: Create Release Record (POST)
+#      TODO: Update Release Record (PUT)
 #    Time Entries API Calls
-#      Show Time Entries (GET)
-#      Show Time Entry (GET)
-#      Show Time Entry (GET)
-#      Create Time Entry (POST)
-#      Delete Time Entry (DELETE)
-#      Update Time Entry (PUT)
+#      TODO: Show Time Entries (GET)
+#      TODO: Show Time Entry (GET)
+#      TODO: Show Time Entry (GET)
+#      TODO: Create Time Entry (POST)
+#      TODO: Delete Time Entry (DELETE)
+#      TODO: Update Time Entry (PUT)
 #    Links API Calls
-#      Show Links (GET)
-#      Create Link (POST)
-#      Delete Link (DELETE)
+#      TODO: Show Links (GET)
+#      TODO: Create Link (POST)
+#      TODO: Delete Link (DELETE)
 #    Users API Calls
-#      Show Users (GET)
-#      Show User (GET)
-#      Show Current User (GET)
+#      TODO: Show Users (GET)
+#      TODO: Show User (GET)
+#      TODO: Show Current User (GET)
 #    Customers API Calls
-#      Show Customers (GET)
-#      Show Customer (GET)
-#      Create Customer (POST)
-#      Update Customer (PUT)
+#      TODO: Show Customers (GET)
+#      TODO: Show Customer (GET)
+#      TODO: Create Customer (POST)
+#      TODO: Update Customer (PUT)
 #    Companies API Calls
-#      Show Companies (GET)
-#      Show Company (GET)
-#      Create Company (POST)
-#      Update Company (PUT)
+#      TODO: Show Companies (GET)
+#      TODO: Show Company (GET)
+#      TODO: Create Company (POST)
+#      TODO: Update Company (PUT)
 #    Services API Calls
-#      Show Services (GET)
-#      Show Service (GET)
-#
+#      TODO: Show Services (GET)
+#      TODO: Show Service (GET)
+# # # # # # # # # # # # # # # # # #
 
 
 
