@@ -1,0 +1,31 @@
+{
+  "name": "gta-service-desk",
+  "version": "1.0.0",
+  "author": {
+    "name": "justmiles"
+  },
+  "main": "gta-service-desk",
+  "homepage": "https://github.com/justmiles/node-gta-service-desk",
+  "bugs": {
+    "url": "https://github.com/justmiles/node-gta-service-desk/issues"
+  },
+  "description": "Node.js client for GotoAssist Service Desk",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/justmiles/node-gta-service-desk.git"
+  },
+  "engines": {
+    "node": ">=0.6.x"
+  },
+  "keywords": [
+    "service-desk",
+    "api",
+    "gotoassist",
+    "gta",
+    "gotoassist-service-desk",
+    "rest"
+  ],
+  "dependencies": {
+    "coffee-script": "^1.9.1"
+  }
+}
