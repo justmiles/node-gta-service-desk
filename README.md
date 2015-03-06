@@ -12,13 +12,11 @@ npm install --save gta-service-desk
 
 ## Getting Started
 
-API Token can be obtained here:
-https://desk.gotoassist.com/my_api_token
+API Token can be obtained here: https://desk.gotoassist.com/my_api_token
 
 Example:
 
 ```javascript
-require('coffee-script/register');
 var ServiceDesk = require('gta-service-desk');
 
 serviceDesk = new ServiceDesk('API_KEY');
