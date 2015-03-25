@@ -14,16 +14,9 @@ class ServiceDesk
     this.XHR "GET", "/incidents/#{id}.json", null, null, callback
 
   createIncident:(payload, callback) ->
-    symptom = payload.symptom
+    # NOTE: you can update the symptom by simply passing in "symptom" String inside the Incident object. This is not documented by GTA.
     payload = incident: payload
-
-    this.XHR "POST", "/incidents.json", null, payload, (res, err) ->
-      if res
-        return callback res
-
-      ServiceDesk::updateIncidentSymptom res.incident.id, res.incident.symptoms[0].symptom.id, symptom, (res, err) ->
-        if (err)
-          console.log err
+    this.XHR "POST", "/incidents.json", null, payload, callback
 
   updateIncident:(id, payload, callback) ->
     payload = incident: payload
