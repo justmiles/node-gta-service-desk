@@ -20,7 +20,7 @@ class ServiceDesk
 
   updateIncident:(id, payload, callback) ->
     payload = incident: payload
-    this.XHR "PUT", "/incidents/#{id}.json", null, null, callback
+    this.XHR "PUT", "/incidents/#{id}.json", null, payload, callback
 
   #  Problems API Calls
   showProblems:(params, callback) ->
