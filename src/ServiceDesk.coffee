@@ -82,7 +82,7 @@ class ServiceDesk
     if params == null
       params = ""
     else
-      params = params.toURL()
+      params = ServiceDesk._toURL(params)
 
     payloadString = JSON.stringify(payload)
 
@@ -124,11 +124,9 @@ class ServiceDesk
     req.write payloadString
     req.end
 
-Object::toURL = ->
-  obj = this
-  "?" + Object.keys(obj).map((k) ->
-    encodeURIComponent(k) + "=" + encodeURIComponent(obj[k])
-  ).join("&")
+  _toURL: (obj)->
+    return "?" + Object.keys(obj).map((k) ->
+        encodeURIComponent(k) + "=" + encodeURIComponent(obj[k])
+      ).join("&")
 
 module.exports = ServiceDesk
-
