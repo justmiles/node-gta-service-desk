@@ -52,6 +52,11 @@ class ServiceDesk
     payload = change: payload
     this.XHR "PUT", "/changes/#{id}.json", null, null, callback
 
+  #  Watches API Calls
+  createIncidentWatch:(incident_id, payload, callback) ->
+    payload = watch: payload
+    this.XHR "POST", "/incidents/#{incident_id}/watches.json", null, payload, callback
+
   #  Release API Calls
   showReleases:(params, callback) ->
     this.XHR "GET", "/releases.json", params, null, callback
