@@ -1,6 +1,6 @@
 {
   "name": "gta-service-desk",
-  "version": "1.0.8",
+  "version": "2.0.0",
   "author": {
     "name": "justmiles"
   },
@@ -29,6 +29,7 @@
     "rest"
   ],
   "dependencies": {
+    "async": "^1.4.2",
     "coffee-script": "^1.9.1"
   },
   "devDependencies": {

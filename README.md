@@ -21,7 +21,7 @@ var ServiceDesk = require('gta-service-desk');
 serviceDesk = new ServiceDesk('API_KEY');
 
 // Shows incident 100 and logs title
-serviceDesk.showIncident(100, function (res) {
+serviceDesk.getIncident(100, function (err, res) {
     console.log(res.incident.title);
 });
 ```
@@ -38,7 +38,7 @@ var incident = {
     assigned_user_id: "0000000000"
 }
 
-serviceDesk.createIncident(incident, function(res) {
+serviceDesk.createIncident(incident, function(err, res) {
     console.log( "Successfully created Incident #" + res.incident.id )
 });
 
