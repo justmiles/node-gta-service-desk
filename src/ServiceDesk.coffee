@@ -137,7 +137,7 @@ class ServiceDesk
           return callback jsonResponse.errors[0].error, jsonResponse
 
         else
-          return callback null, jsonResponse
+          return callback null, jsonResponse.result
 
     req.on "error", (e) ->
       console.log "HTTPS ERROR: " + e
