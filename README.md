@@ -85,7 +85,6 @@ var ServiceDesk = require('gta-service-desk');
 serviceDesk = new ServiceDesk('API_KEY');
 
 var watch = {
-    watched_by: INCREMENT,
     external_email: EMAIL
 }
 
@@ -93,7 +92,6 @@ serviceDesk.createIncidentWatch(100, watch, function (res) {
     console.log( "Successfully created watch #" + res.watch.id )
 });
 ```
-The INCREMENT is needed because `watched_by` is a mandatory POST parameter. If you need to create multiple external watchlists for a same incident, INCREMENT must be different for each of them. 
 
 If you want to notify the people in the watchlists (external and internal), you must update the incident with the POST parameter `notify_watchlisted` set to true after the creation of the said watchlists.
 
