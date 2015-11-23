@@ -6,7 +6,7 @@
   },
   "main": "gta-service-desk",
   "scripts": {
-    "test": "expresso test/*"
+    "test": "node node_modules/expresso/bin/expresso test/*"
   },
   "homepage": "https://github.com/justmiles/node-gta-service-desk",
   "bugs": {
