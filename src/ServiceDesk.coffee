@@ -37,6 +37,48 @@ class ServiceDesk
     payload = incident: payload
     @_request "PUT", "incidents/#{id}.json", null, payload, callback
 
+  updateIncidentSymptom:(ticketId, symptomId, message, callback) ->
+    params = note_type : "symptom"
+    payload = symptom: {}
+    payload.symptom.note = message
+    @_request "PUT", "incidents/#{ticketId}/comments/#{symptomId}.json", params, payload, callback
+
+  openIncident:(id, callback) ->
+    incident =
+      closed_at: ''
+      closure_code: ''
+    @updateIncident id, incident, callback
+
+  closeIncident:(id, message, callback) ->
+    now = new Date()
+    incident =
+      closed_at: now
+      closure_code: 0
+      closure_comment: message
+    @updateIncident id, incident, callback
+
+  addIncidentComment:(id, comment, callback) ->
+    payload = comment: note: comment
+    @createNote 'incidents', id, 'comments', payload, callback
+
+  addIncidentResolution:(id, resolution, callback) ->
+    payload = resolution: note: resolution
+    @createNote 'incidents', id, 'resolutions', payload, callback
+
+  resolveAndCloseIncident:(id, resolution, callback) ->
+    serviceDesk = this
+    @addIncidentResolution id, resolution, (err, res) ->
+      return callback err, res if err
+      serviceDesk.closeIncident id, 'Closing because incident is resolved.', callback
+
+  #  Notes API Calls
+  getNote:(parent, parentId, type, id, callback) ->
+    @_request "GET", "#{parent}/#{parentId}/#{type}/#{id}.json", null, null, callback
+
+  createNote:(parent, parentId, type, payload, callback) ->
+    params = note_type: type
+    @_request "POST", "#{parent}/#{parentId}/#{type}.json", params, payload, callback
+
   #  Problems API Calls
   getProblems:(params, callback) ->
     @_request "GET", "problems.json", params, null, callback
@@ -87,15 +129,17 @@ class ServiceDesk
     payload = release: payload
     @_request "PUT", "releases/#{id}.json", null, null, callback
 
-  updateIncidentSymptom:(ticketId, symptomId, message, callback) ->
-    params =
-      note_type : "symptom"
+  #  Customers API Calls
+  getCustomers:(params, callback) ->
+    @_request "GET", "customers.json", params, null, callback
 
-    payload =
-      symptom: {}
-    payload.symptom.note = message
+  createCustomer:(payload, callback) ->
+    payload = release: payload
+    @_request "POST", "releases.json", null, payload, callback
 
-    @_request "PUT", "incidents/#{ticketId}/comments/#{symptomId}.json", params, payload, callback
+  createOrUpdateCustomer:(payload, callback) ->
+    payload = release: payload
+    @_request "POST", "releases.json", null, payload, callback
 
   #  utils
   _request:(method, api, params, payload, callback) ->
@@ -114,7 +158,8 @@ class ServiceDesk
       headers:
         "Content-Type": "application/json"
         "Content-Length": payloadString.length
-
+    console.log options
+    console.log payloadString if payloadString
     req = http.request options, (res) ->
       res.setEncoding "utf8"
       response = ""
