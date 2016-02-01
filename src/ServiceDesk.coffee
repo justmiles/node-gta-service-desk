@@ -1,10 +1,69 @@
-http = require("https")
+http  = require 'https'
+log   = require('debug-logger')("ServiceDesk")
 
 class ServiceDesk
   constructor: (apiKey) ->
     @apiKey = process.env.SERVICE_DESK_KEY or apiKey
+    unless @apiKey
+      throw 'ERROR: Service Desk API key is not set. Try instantiating with "new ServiceDesk(\'your_api_key\')" or setting the SERVICE_DESK_KEY environment variable'
     @host = process.env.SERVICE_DESK_HOST or "deskapi.gotoassist.com"
     @apiVersion = process.env.SERVICE_DESK_VERSION or "v1"
+
+  #  utils
+  _request:(method, api, params, payload, callback) ->
+    unless params?
+      params = ''
+    else
+      params = @_toURL(params)
+
+    payloadString = JSON.stringify(payload)
+
+    options =
+      host: @host
+      path: "/#{@apiVersion}/#{api}#{params}"
+      method: method
+      auth: "x:#{@apiKey}"
+      headers:
+        "Content-Type": "application/json"
+        "Content-Length": payloadString.length
+    log.debug 'Request options', options
+    log.debug 'Request payload', payloadString if payload
+    req = http.request options, (res) ->
+      res.setEncoding "utf8"
+      response = ""
+
+      res.on "data", (data) ->
+        response += data
+
+      res.on "end", ->
+        try
+          log.debug response
+          jsonResponse = JSON.parse response
+
+        catch e
+          log.debug "Response:", response
+          return callback "Could not parse as JSON response. #{e}. Received #{response}"
+
+        if res.headers.status != "200 OK"
+          msg = "[ERROR] #{res.statusCode}: #{res.headers.status}"
+          return callback msg, jsonResponse
+
+        else if jsonResponse.status == 'Failed'
+          return callback jsonResponse.errors[0].error, jsonResponse
+
+        else
+          return callback null, jsonResponse.result
+
+    req.on "error", (e) ->
+      console.log "HTTPS ERROR: " + e
+
+    req.write payloadString
+    req.end
+
+  _toURL: (obj)->
+    return "?" + Object.keys(obj).map((k) ->
+        encodeURIComponent(k) + "=" + encodeURIComponent(obj[k])
+      ).join("&")
 
   getTicket:(type, id, params, callback) ->
     if type not in ['incident', 'change', 'release', 'problem']
@@ -77,6 +136,7 @@ class ServiceDesk
 
   createNote:(parent, parentId, type, payload, callback) ->
     params = note_type: type
+#    params = note_type: type.replace(/s$/,'')
     @_request "POST", "#{parent}/#{parentId}/#{type}.json", params, payload, callback
 
   #  Problems API Calls
@@ -123,11 +183,34 @@ class ServiceDesk
 
   createRelease:(payload, callback) ->
     payload = release: payload
-    @_request "POST", "releases.json", null, payload, callback
+    serviceDesk = @
+    @_request "POST", "releases.json", null, payload, (err, release) ->
+      return callback err, release if err
+      if payload.release.component
+        serviceDesk.setReleaseComponent release.release.id, payload.release.component, (err, res) ->
+          callback err, release
+      else
+        callback err, release
 
   updateRelease:(id, payload, callback) ->
     payload = release: payload
-    @_request "PUT", "releases/#{id}.json", null, null, callback
+    @_request "PUT", "releases/#{id}.json", null, payload, callback
+
+  setReleaseComponent:(id, component, callback) ->
+    payload = component: note: component
+    @createNote 'releases', id, 'components', payload, callback
+
+#  setReleaseInstruction:(id, instruction, callback) ->
+#    payload = instruction: note: instruction
+#    @createNote 'releases', id, 'instructions', payload, callback
+
+  setReleaseBackoutPlan:(id, backout, callback) ->
+    payload = backout: note: backout
+    @createNote 'releases', id, 'backouts', payload, callback
+
+  addReleaseComment:(id, comment, callback) ->
+    payload = comment: note: comment
+    @createNote 'releases', id, 'comments', payload, callback
 
   #  Customers API Calls
   getCustomers:(params, callback) ->
@@ -141,58 +224,13 @@ class ServiceDesk
     payload = release: payload
     @_request "POST", "releases.json", null, payload, callback
 
-  #  utils
-  _request:(method, api, params, payload, callback) ->
-    unless params?
-      params = ''
-    else
-      params = @_toURL(params)
+  #  Services API Calls
+  getServices:(callback) ->
+    payload = release: payload
+    @_request "GET", "services.json", null, payload, callback
 
-    payloadString = JSON.stringify(payload)
-
-    options =
-      host: @host
-      path: "/#{@apiVersion}/#{api}#{params}"
-      method: method
-      auth: "x:#{@apiKey}"
-      headers:
-        "Content-Type": "application/json"
-        "Content-Length": payloadString.length
-    console.log options
-    console.log payloadString if payloadString
-    req = http.request options, (res) ->
-      res.setEncoding "utf8"
-      response = ""
-
-      res.on "data", (data) ->
-        response += data
-
-      res.on "end", ->
-        try
-          jsonResponse = JSON.parse response
-
-        catch e
-          return callback "Could not parse as JSON response. #{e}. Received #{response}"
-
-        if res.headers.status != "200 OK"
-          msg = "[ERROR] #{res.statusCode}: #{res.headers.status}"
-          return callback msg, jsonResponse
-
-        else if jsonResponse.status == 'Failed'
-          return callback jsonResponse.errors[0].error, jsonResponse
-
-        else
-          return callback null, jsonResponse.result
-
-    req.on "error", (e) ->
-      console.log "HTTPS ERROR: " + e
-
-    req.write payloadString
-    req.end
-
-  _toURL: (obj)->
-    return "?" + Object.keys(obj).map((k) ->
-        encodeURIComponent(k) + "=" + encodeURIComponent(obj[k])
-      ).join("&")
+  getService:(id, callback) ->
+    payload = release: payload
+    @_request "GET", "services/#{id}.json", null, payload, callback
 
 module.exports = ServiceDesk
