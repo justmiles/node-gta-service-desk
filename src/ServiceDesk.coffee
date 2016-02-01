@@ -163,11 +163,65 @@ class ServiceDesk
 
   createChange:(payload, callback) ->
     payload = change: payload
-    @_request "POST", "changes.json", null, payload, callback
+    serviceDesk = @
+    @_request "POST", "changes.json", null, payload, (err, change) ->
+      callback err, change
+      return if err
+      if payload.change.reason
+        serviceDesk.setChangeReason change.change.id, payload.change.reason, log.debug
+
+  linkChangeToIncident: (changeId, incidentId, callback) ->
+    payload = release_id: incidentId
+    @_request "POST", "links/changes/#{changeId}", null, payload, callback
+
+  linkChangeToRelease: (changeId, releaseId, callback) ->
+    payload = release_id: releaseId
+    @_request "POST", "links/changes/#{changeId}", null, payload, callback
+
+  linkChangeToProblem: (changeId, problemId, callback) ->
+    payload = problem_id: problemId
+    @_request "POST", "links/changes/#{changeId}", null, payload, callback
+
+  linkChangeToChange: (changeId, secondChangeId, callback) ->
+    payload = change_id: secondChangeId
+    @_request "POST", "links/changes/#{changeId}", null, payload, callback
 
   updateChange:(id, payload, callback) ->
     payload = change: payload
     @_request "PUT", "changes/#{id}.json", null, null, callback
+
+  setChangeDescription:(id, description, callback) ->
+    payload = description: note: description
+    @createNote 'changes', id, 'descriptions', payload, callback
+
+  deleteChangeDescription:(changeId, descriptionId, callback) ->
+    params = note_type : 'description'
+    @_request "DELETE", "changes/#{changeId}/descriptions/#{descriptionId}.json", params, null, callback
+
+  getChangeDescription:(changeId, descriptionId, callback) ->
+    @_request "GET", "changes/#{changeId}/descriptions/#{descriptionId}.json", null, null, callback
+
+  setChangeReason:(id, reason, callback) ->
+    payload = reason: note: reason
+    @createNote 'changes', id, 'reasons', payload, callback
+
+  setChangeBuildInstruction:(id, instruction, callback) ->
+    payload = build_instruction: note: instruction
+    @createNote 'changes', id, 'build_instructions', payload, callback
+
+  addChangeBuildProgress:(id, instruction, callback) ->
+    payload = build_progress_note: note: instruction
+    @createNote 'changes', id, 'build_progress_notes', payload, callback
+
+#  addChangeTestPlan:(id, plan, callback) ->
+#    payload = test_plan: note: plan
+#    @createNote 'changes', id, 'test_plans', payload, callback
+
+  getChangeTesters:(id, callback) ->
+    @_request 'GET', "changes/#{id}/testers.json", null, null, callback
+
+  getChangePlans:(id, callback) ->
+    @_request 'GET', "changes/#{id}/test_plans.json", null, null, callback
 
   #  Watches API Calls
   createIncidentWatch:(incident_id, payload, callback) ->
@@ -185,12 +239,13 @@ class ServiceDesk
     payload = release: payload
     serviceDesk = @
     @_request "POST", "releases.json", null, payload, (err, release) ->
-      return callback err, release if err
+      callback err, release
+      return if err
+      if payload.release.backout
+        serviceDesk.setReleaseBackoutPlan release.release.id, payload.release.backout, log.debug
       if payload.release.component
-        serviceDesk.setReleaseComponent release.release.id, payload.release.component, (err, res) ->
-          callback err, release
-      else
-        callback err, release
+        serviceDesk.setReleaseComponent release.release.id, payload.release.component, log.debug
+
 
   updateRelease:(id, payload, callback) ->
     payload = release: payload
