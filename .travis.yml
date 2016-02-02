@@ -6,3 +6,12 @@ node_js:
   - "0.10"
   - "iojs"
   - "iojs-v1.0.4"
+
+
+deploy:
+  provider: npm
+  api_key: $API_KEY
+
+env:
+  global:
+    secure: yNkzVhmDg6vmH3yQU07dR6Lwo9ou2CLCwFN3j5kKGOZngFMrBnQtci9hwmlIcTr0T1QyMFXa+DhccGmHrmcthmJgBSAJGm2ffgb2jKAP4yuYOX6MmU426QGlnDgfJYPSH1OSRJ69I5Ya9qwbxIugwgZTmSR6EJYDRxaSO1p12jY=
