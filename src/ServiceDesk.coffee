@@ -1,5 +1,3 @@
-# http  = require 'https'
-http = require('http-debug').https
 request = require('request')
 log   = require('debug-logger')("ServiceDesk")
 http.debug = 2
