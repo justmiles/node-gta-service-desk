@@ -2,3 +2,4 @@ node-gta-service-desk.iml
 .idea
 .working
 node_modules
+coverage

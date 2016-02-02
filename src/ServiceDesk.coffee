@@ -1,64 +1,44 @@
-http  = require 'https'
+# http  = require 'https'
+http = require('http-debug').https
+request = require('request')
 log   = require('debug-logger')("ServiceDesk")
+http.debug = 2
 
 class ServiceDesk
   constructor: (apiKey) ->
-    @apiKey = process.env.SERVICE_DESK_KEY or apiKey
+    @apiKey = process.env.SERVICE_DESK_API_KEY or apiKey
     unless @apiKey
-      throw 'ERROR: Service Desk API key is not set. Try instantiating with "new ServiceDesk(\'your_api_key\')" or setting the SERVICE_DESK_KEY environment variable'
+      throw 'ERROR: Service Desk API key is not set. Try instantiating with "new ServiceDesk(\'your_api_key\')" or setting the SERVICE_DESK_API_KEY environment variable'
     @host = process.env.SERVICE_DESK_HOST or "deskapi.gotoassist.com"
     @apiVersion = process.env.SERVICE_DESK_VERSION or "v1"
 
   #  utils
   _request:(method, api, params, payload, callback) ->
-    unless params?
-      params = ''
-    else
-      params = @_toURL(params)
-
-    payloadString = JSON.stringify(payload)
-
     options =
-      host: @host
-      path: "/#{@apiVersion}/#{api}#{params}"
+      url: "https://#{@host}/#{@apiVersion}/#{api}"
       method: method
-      auth: "x:#{@apiKey}"
       headers:
-        "Content-Type": "application/json"
-        "Content-Length": payloadString.length
+        authorization: "Basic " + new Buffer('x:' + @apiKey).toString("base64")
+      json: true
+    options.qs = params if params
+    options.body = payload if payload
+
     log.debug 'Request options', options
-    log.debug 'Request payload', payloadString if payload
-    req = http.request options, (res) ->
-      res.setEncoding "utf8"
-      response = ""
+    log.debug 'Request payload', payload if payload
 
-      res.on "data", (data) ->
-        response += data
+    request options, (err, res, body) ->
+      log.warn err if err
+      log.debug res
+      log.debug body
 
-      res.on "end", ->
-        try
-          log.debug response
-          jsonResponse = JSON.parse response
+      if res.statusCode != 200
+        return callback new Error("[ERROR] #{res.statusCode}"), body
 
-        catch e
-          log.debug "Response:", response
-          return callback "Could not parse as JSON response. #{e}. Received #{response}"
+      else if body.status == 'Failed'
+        return callback body.errors[0].error, body
 
-        if res.headers.status != "200 OK"
-          msg = "[ERROR] #{res.statusCode}: #{res.headers.status}"
-          return callback msg, jsonResponse
-
-        else if jsonResponse.status == 'Failed'
-          return callback jsonResponse.errors[0].error, jsonResponse
-
-        else
-          return callback null, jsonResponse.result
-
-    req.on "error", (e) ->
-      console.log "HTTPS ERROR: " + e
-
-    req.write payloadString
-    req.end
+      else
+        return callback null, body.result
 
   _toURL: (obj)->
     return "?" + Object.keys(obj).map((k) ->
