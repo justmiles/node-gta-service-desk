@@ -6,9 +6,11 @@ enums =
   api_key: 'aabbccddeeffgghhiijjkk'
   api_host: 'https://deskapi.gotoassist.com'
 
+# Main ServiceDesk Library
 describe 'ServiceDesk', ->
 
   describe '#constructor()', ->
+
     it 'API Key is not defined', (done) ->
       serviceDesk = {}
       try
@@ -19,12 +21,17 @@ describe 'ServiceDesk', ->
         throw 'Expected api_key to be empty' if serviceDesk.api_key
         done()
 
-  describe '#constructor()', ->
     it 'API Key is defined', (done) ->
       serviceDesk = new ServiceDesk(enums.api_key)
       throw 'nope' if serviceDesk.api_key == null
       done()
 
+  describe '#_request()', ->
+
+    it 'TODO: _request() tests', (done) ->
+      done()
+
+# Incidents
 describe 'Incidents', ->
 
   describe '#getIncident()', ->
