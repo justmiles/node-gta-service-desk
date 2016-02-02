@@ -5,6 +5,6 @@ node_js:
 deploy:
   provider: npm
   api_key:
-    secure: eHo6wmh0m8DxniAAKqzqvB+F5X33fjYlitYJ12GcowyV28c5usMe735kWzFKW4BYOT4PXD1QrWIOACPfj514L86+ATIqrxA9P+8cr8eyf06TXKUSzkQMQHh972AdFZriQIKZeWX3TRbxhbILLP30ij6ChBJdNjKx1LC3V6XBe/I=
+    secure: FNF9RHhP1yERlrQ9LQaqtbQvbSbC1NajJ7eSkp1JrqVM8aaCR2sRsSB3MqE4/gqq9ZkpyeNvPNTsh0gEq5emrr6UNI14R3wMd7HteGBDF6vGjomvaM/d2B7BUMEe6NgYU4feW3L5aS6Ks0Ujq/nxgZGO2T1IMGt6BfrAB/FKt0g=
   email:
     secure: dCCK6r0Z189d/Zf2GLCkavRYimnMLOCtfGF/ZUkZcryQA1PuOIX4vuIQGDWtBwKK8PnF4XptrzvCmsnXkEw4zY0NUwxj5qlQkYFe2hoctel+w8nDg2Lh/9WjqJ/UR4OCqdX4deUwgBNMW7QNhjSJzxYilA8SSenv18Gn5Gp0Gho=
