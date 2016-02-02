@@ -1,12 +1,8 @@
 language: node_js
 node_js:
-  - "stable"
-  - "v0.12.6"
-
+- stable
+- v0.12.6
 deploy:
   provider: npm
-  api_key: $API_KEY
-
-env:
-  global:
-    secure: yNkzVhmDg6vmH3yQU07dR6Lwo9ou2CLCwFN3j5kKGOZngFMrBnQtci9hwmlIcTr0T1QyMFXa+DhccGmHrmcthmJgBSAJGm2ffgb2jKAP4yuYOX6MmU426QGlnDgfJYPSH1OSRJ69I5Ya9qwbxIugwgZTmSR6EJYDRxaSO1p12jY=
+  api_key:
+    secure: eHo6wmh0m8DxniAAKqzqvB+F5X33fjYlitYJ12GcowyV28c5usMe735kWzFKW4BYOT4PXD1QrWIOACPfj514L86+ATIqrxA9P+8cr8eyf06TXKUSzkQMQHh972AdFZriQIKZeWX3TRbxhbILLP30ij6ChBJdNjKx1LC3V6XBe/I=
