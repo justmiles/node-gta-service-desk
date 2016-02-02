@@ -6,3 +6,5 @@ deploy:
   provider: npm
   api_key:
     secure: eHo6wmh0m8DxniAAKqzqvB+F5X33fjYlitYJ12GcowyV28c5usMe735kWzFKW4BYOT4PXD1QrWIOACPfj514L86+ATIqrxA9P+8cr8eyf06TXKUSzkQMQHh972AdFZriQIKZeWX3TRbxhbILLP30ij6ChBJdNjKx1LC3V6XBe/I=
+  email:
+    secure: dCCK6r0Z189d/Zf2GLCkavRYimnMLOCtfGF/ZUkZcryQA1PuOIX4vuIQGDWtBwKK8PnF4XptrzvCmsnXkEw4zY0NUwxj5qlQkYFe2hoctel+w8nDg2Lh/9WjqJ/UR4OCqdX4deUwgBNMW7QNhjSJzxYilA8SSenv18Gn5Gp0Gho=
