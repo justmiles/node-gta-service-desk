@@ -1,6 +1,5 @@
 request = require('request')
 log   = require('debug-logger')("ServiceDesk")
-http.debug = 2
 
 class ServiceDesk
   constructor: (apiKey) ->
