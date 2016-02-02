@@ -4,6 +4,8 @@ node_js:
 - v0.12.6
 before_script:
   - npm install -g mocha
+after_success:
+  - npm run coverage-text
 deploy:
   provider: npm
   api_key:

@@ -24,15 +24,19 @@ class ServiceDesk
     log.debug 'Request payload', payload if payload
 
     request options, (err, res, body) ->
-      log.warn err if err
-      log.debug res
-      log.debug body
+      log.warn "Error", err if err
+      log.debug "Response Body", body
+
+      return callback new Error('No response received') unless res
 
       if res.statusCode != 200
         return callback new Error("[ERROR] #{res.statusCode}"), body
 
       else if body.status == 'Failed'
-        return callback body.errors[0].error, body
+        return callback new Error(body.errors[0].error), body
+
+      else unless body.result
+        return callback new Error('No "result" in body'), body
 
       else
         return callback null, body.result

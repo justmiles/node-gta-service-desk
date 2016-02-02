@@ -6,8 +6,9 @@
   },
   "main": "gta-service-desk",
   "scripts": {
-    "test": "mocha --recursive --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul test/test.coffee",
-    "coverage": "./node_modules/.bin/istanbul report"
+    "test": "mocha --recursive --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul test/ServiceDeskTests.coffee",
+    "coverage": "./node_modules/.bin/istanbul report",
+    "coverage-text": "./node_modules/.bin/istanbul report text-summary lcov"
   },
   "homepage": "https://github.com/justmiles/node-gta-service-desk",
   "bugs": {
