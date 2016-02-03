@@ -1,18 +1,17 @@
 # GTA Service Desk
 
-Node.js client for GotoAssist Service Desk
+> Node.js client for GotoAssist Service Desk
 
-## Installation
+[![Build Status](https://travis-ci.org/justmiles/node-gta-service-desk.svg?branch=master)](https://travis-ci.org/justmiles/node-gta-service-desk)
+
+## Getting Started
 
 If you have the node package manager, npm, installed:
 
 ```shell
 npm install --save gta-service-desk
 ```
-
-## Getting Started
-
-API Token can be obtained here: https://desk.gotoassist.com/my_api_token
+Obtain your API here: https://desk.gotoassist.com/my_api_token
 
 ###Show an incident
 ```javascript
