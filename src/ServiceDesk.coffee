@@ -1,50 +1,70 @@
 request = require('request')
 log   = require('debug-logger')("ServiceDesk")
+async = require 'async'
 
 class ServiceDesk
-  constructor: (apiKey) ->
-    @apiKey = process.env.SERVICE_DESK_API_KEY or apiKey
+  constructor: (@apiKey, @concurrency = 1) ->
+    @apiKey or= process.env.SERVICE_DESK_API_KEY
     unless @apiKey
       throw 'ERROR: Service Desk API key is not set. Try instantiating with "new ServiceDesk(\'your_api_key\')" or setting the SERVICE_DESK_API_KEY environment variable'
     @host = process.env.SERVICE_DESK_HOST or "deskapi.gotoassist.com"
     @apiVersion = process.env.SERVICE_DESK_VERSION or "v1"
+    @delay = 500
 
   #  utils
-  _request:(method, api, params, payload, callback) ->
+
+  _queue: async.queue ((task, callback) ->
+
     options =
-      url: "https://#{@host}/#{@apiVersion}/#{api}"
-      method: method
+      url: "https://#{task.host}/#{task.apiVersion}/#{task.api}"
+      method: task.method
       headers:
-        authorization: "Basic " + new Buffer('x:' + @apiKey).toString("base64")
+        authorization: "Basic " + new Buffer('x:' + task.apiKey).toString("base64")
       json: true
-    options.qs = params if params
-    options.body = payload if payload
+    options.qs = task.params if task.params
+    options.body = task.payload if task.payload
 
     log.debug 'Request options', options
-    log.debug 'Request payload', payload if payload
+    log.debug 'Request payload', task.payload if task.payload
 
-    request options, (err, res, body) ->
-      log.warn "Error", err if err
-      log.debug "Response Body", body
+    setTimeout (->
+      request options, (err, res, body) ->
+        GLOBAL.calls or= 0
+        calls += 1
+        console.log calls
+        log.warn "Error", err if err
+        log.debug "Response Body", body
 
-      return callback new Error('No response received') unless res
+        return callback new Error('No response received') unless res
 
-      if res.statusCode != 200
-        return callback new Error("[ERROR] #{res.statusCode}"), body
+        if res.statusCode != 200
+          return callback new Error("[ERROR] #{res.statusCode}"), body
 
-      else if body.status == 'Failed'
-        return callback new Error(body.errors[0].error), body
+        else if body.status == 'Failed'
+          return callback new Error(body.errors[0].error), body
 
-      else unless body.result
-        return callback new Error('No "result" in body'), body
+        else unless body.result
+          return callback new Error('No "result" in body'), body
 
-      else
-        return callback null, body.result
+        else
+          return callback null, body.result
 
-  _toURL: (obj)->
-    return "?" + Object.keys(obj).map((k) ->
-        encodeURIComponent(k) + "=" + encodeURIComponent(obj[k])
-      ).join("&")
+    ), task.delay
+
+  ), @concurrency
+
+  _request:(method, api, params, payload, callback) ->
+    task =
+      method: method
+      api: api
+      params: params
+      payload: payload
+      host: @host
+      apiVersion: @apiVersion
+      apiKey: @apiKey
+      delay: @delay
+
+    @_queue.push task, callback
 
   getTicket:(type, id, params, callback) ->
     if type not in ['incident', 'change', 'release', 'problem']
@@ -150,6 +170,16 @@ class ServiceDesk
       return if err
       if payload.change.reason
         serviceDesk.setChangeReason change.change.id, payload.change.reason, log.debug
+      if payload.change.description
+        if change.change.descriptions?[0]?.description?.id
+          serviceDesk.updateChangeDescription change.change.id, change.change.descriptions[0].description.id, payload.change.description, log.debug
+        else
+          serviceDesk.setChangeDescription change.change.id, payload.change.description, log.debug
+      if payload.change.build_instruction
+        serviceDesk.setChangeBuildInstruction change.change.id, payload.change.build_instruction, log.debug
+      if payload.change.build_progress_note
+        serviceDesk.addChangeBuildProgress change.change.id, payload.change.build_progress_note, log.debug
+
 
   linkChangeToIncident: (changeId, incidentId, callback) ->
     payload = release_id: incidentId
@@ -172,12 +202,19 @@ class ServiceDesk
     @_request "PUT", "changes/#{id}.json", null, null, callback
 
   setChangeDescription:(id, description, callback) ->
+    sd = @
     payload = description: note: description
     @createNote 'changes', id, 'descriptions', payload, callback
 
   deleteChangeDescription:(changeId, descriptionId, callback) ->
     params = note_type : 'description'
     @_request "DELETE", "changes/#{changeId}/descriptions/#{descriptionId}.json", params, null, callback
+    @createNote 'changes', id, 'descriptions', payload, callback
+
+  updateChangeDescription:(changeId, descriptionId, description, callback) ->
+    params = note_type : 'description'
+    payload = description: note: description
+    @_request "PUT", "changes/#{changeId}/descriptions/#{descriptionId}.json", params, payload, callback
 
   getChangeDescription:(changeId, descriptionId, callback) ->
     @_request "GET", "changes/#{changeId}/descriptions/#{descriptionId}.json", null, null, callback
@@ -217,6 +254,8 @@ class ServiceDesk
     @_request "GET", "releases/#{id}.json", null, null, callback
 
   createRelease:(payload, callback) ->
+    if payload.component
+      payload.release_component = payload.component
     payload = release: payload
     serviceDesk = @
     @_request "POST", "releases.json", null, payload, (err, release) ->
@@ -225,20 +264,33 @@ class ServiceDesk
       if payload.release.backout
         serviceDesk.setReleaseBackoutPlan release.release.id, payload.release.backout, log.debug
       if payload.release.component
-        serviceDesk.setReleaseComponent release.release.id, payload.release.component, log.debug
-
+        if release.release_components?[0]?.component.id
+          serviceDesk.updateReleaseComponent release.release.id, release.release.release_components[0].component.id, payload.release.component, log.debug
+        else
+          serviceDesk.setReleaseComponent release.release.id, payload.release.component, log.debug
 
   updateRelease:(id, payload, callback) ->
     payload = release: payload
     @_request "PUT", "releases/#{id}.json", null, payload, callback
 
   setReleaseComponent:(id, component, callback) ->
-    payload = component: note: component
-    @createNote 'releases', id, 'components', payload, callback
+    sd = @
+    @getRelease id, (err, res) ->
+      return callback err, res if err
+      if res.release.release_components[0]?.release_component?.id
+        sd.updateReleaseComponent id, res.release.release_components[0].release_component.id, component, callback
+      else
+        payload = component: note: component
+        sd.createNote 'releases', id, 'components', payload, callback
 
-#  setReleaseInstruction:(id, instruction, callback) ->
-#    payload = instruction: note: instruction
-#    @createNote 'releases', id, 'instructions', payload, callback
+  updateReleaseComponent:(releaseId, componentId, component, callback) ->
+    params = note_type : 'component'
+    payload = component: note: component
+    @_request "PUT", "releases/#{releaseId}/components/#{componentId}.json", params, payload, callback
+
+  setReleaseInstruction:(id, instruction, callback) ->
+    payload = instruction: note: instruction
+    @createNote 'releases', id, 'instructions', payload, callback
 
   setReleaseBackoutPlan:(id, backout, callback) ->
     payload = backout: note: backout
