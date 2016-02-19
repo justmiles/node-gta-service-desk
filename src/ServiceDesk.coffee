@@ -31,7 +31,7 @@ class ServiceDesk
       request options, (err, res, body) ->
         GLOBAL.calls or= 0
         calls += 1
-        console.log calls
+        log.debug "API Call Counter: #{calls}"
         log.warn "Error", err if err
         log.debug "Response Body", body
 

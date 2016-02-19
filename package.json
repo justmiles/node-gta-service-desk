@@ -6,7 +6,7 @@
   },
   "main": "gta-service-desk",
   "scripts": {
-    "test": "mocha --recursive --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul test/ServiceDeskTests.coffee",
+    "test": "mocha --recursive --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul test/*.coffee",
     "coverage": "./node_modules/.bin/istanbul report",
     "coverage-text": "./node_modules/.bin/istanbul report text-summary lcov"
   },

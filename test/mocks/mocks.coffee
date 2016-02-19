@@ -131,6 +131,10 @@ problem =
 #  .reply(200, JSON.stringify(incident));
 
 module.exports =
+  enums:
+    api_key: 'aabbccddeeffgghhiijjkk'
+    api_host: 'https://deskapi.gotoassist.com'
+
   incidents: [ openIncident, closedIncident ]
 
   successfulResponse:
