@@ -113,6 +113,7 @@ class ServiceDesk
     now = new Date()
     incident =
       closed_at: now
+      resolved_at: now
       closure_code: 0
       closure_comment: message
     @updateIncident id, incident, callback
