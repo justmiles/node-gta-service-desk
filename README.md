@@ -13,7 +13,7 @@ npm install --save gta-service-desk
 ```
 Obtain your API here: https://desk.gotoassist.com/my_api_token
 
-###Show an incident
+### Show an incident
 ```javascript
 var ServiceDesk = require('gta-service-desk');
 
@@ -25,7 +25,7 @@ serviceDesk.getIncident(100, function (err, res) {
 });
 ```
 
-###Create an incident
+### Create an incident
 ```javascript
 var ServiceDesk = require('gta-service-desk');
 
@@ -43,7 +43,7 @@ serviceDesk.createIncident(incident, function(err, res) {
 
 ```
 
-###Update an incident
+### Update an incident
 ```javascript
 var ServiceDesk = require('gta-service-desk');
 
@@ -62,7 +62,7 @@ serviceDesk.showIncident(100, function (res) {
 });
 ```
 
-###Create a internal watchlist for an incident
+### Create a internal watchlist for an incident
 ```javascript
 var ServiceDesk = require('gta-service-desk');
 
@@ -77,7 +77,7 @@ serviceDesk.createIncidentWatch(100, watch, function (res) {
 });
 ```
 
-###Create an external watchlist for an incident
+### Create an external watchlist for an incident
 ```javascript
 var ServiceDesk = require('gta-service-desk');
 
