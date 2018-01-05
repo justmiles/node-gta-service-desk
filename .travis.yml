@@ -1,6 +1,7 @@
 language: node_js
+node_js:
+  - v0.12.6
 before_install:
-  - "npm install -g npm@latest"
   - npm install -g mocha
 after_success:
   - npm run coverage-text
